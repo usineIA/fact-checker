@@ -1,12 +1,12 @@
-# Bot version enrichie avec gestion prénom/âge
+# Bot version enrichie avec gestion prénom/âge - Hugging Face Spaces (Gradio)
 import os
 import requests
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
-from dotenv import load_dotenv
+import threading
+import gradio as gr
 
-# Charger les clés depuis le .env
-load_dotenv()
+# Récupération des tokens depuis les variables d'environnement Hugging Face
 API_TOKEN_TOGETHER = os.getenv("API_TOKEN_TOGETHER")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
@@ -32,7 +32,7 @@ def chat_with_ai(user_input, user_name, niveau="enfant"):
             f"Si tu ne sais pas, dis-le honnêtement. Propose de demander à un adulte si besoin."
         )
         if contains_sensitive_content(user_input):
-            return "⛔ Cette question n’est pas adaptée aux enfants. Tu peux demander à un adulte de t’aider."
+            return "⛔ Cette question n'est pas adaptée aux enfants. Tu peux demander à un adulte de t'aider."
 
     elif niveau == "ado":
         system_prompt = (
@@ -46,7 +46,7 @@ def chat_with_ai(user_input, user_name, niveau="enfant"):
         system_prompt = (
             f"Tu es FactCheck_Bot, une IA experte en vérification d'informations. "
             f"Tu aides {user_name} à savoir si une affirmation est vraie, fausse ou incertaine. "
-            f"Tu expliques brièvement, de manière neutre, sans inventer de faits. Dis-le si tu n’es pas sûr(e)."
+            f"Tu expliques brièvement, de manière neutre, sans inventer de faits. Dis-le si tu n'es pas sûr(e)."
         )
 
     payload = {
@@ -66,13 +66,13 @@ def chat_with_ai(user_input, user_name, niveau="enfant"):
         else:
             return f"Erreur API ({response.status_code}) : {response.text}"
     except Exception as e:
-        return f"Une erreur s’est produite : {e}"
+        return f"Une erreur s'est produite : {e}"
 
 # Commande /start → démarrage personnalisé
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_data[chat_id] = {"step": "awaiting_name"}
-    await update.message.reply_text("Bonjour 👋 ! Comment t’appelles-tu ?")
+    await update.message.reply_text("Bonjour 👋 ! Comment t'appelles-tu ?")
 
 # Message handler complet (avec état utilisateur)
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -81,7 +81,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if chat_id not in user_data:
         user_data[chat_id] = {"step": "awaiting_name"}
-        await update.message.reply_text("Bonjour 👋 ! Comment t’appelles-tu ?")
+        await update.message.reply_text("Bonjour 👋 ! Comment t'appelles-tu ?")
         return
 
     state = user_data[chat_id]["step"]
@@ -105,7 +105,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 user_data[chat_id]["niveau"] = "adulte"
             await update.message.reply_text(f"Génial {user_data[chat_id]['name']} ! Je suis là pour t'aider à vérifier tes informations. Prêt ?")
         except ValueError:
-            await update.message.reply_text("Peux-tu m’indiquer ton âge en nombre ? (ex : 10)")
+            await update.message.reply_text("Peux-tu m'indiquer ton âge en nombre ? (ex : 10)")
         return
 
     elif state == "ready":
@@ -114,15 +114,53 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response = chat_with_ai(message, name, niveau)
         await update.message.reply_text(response)
 
-# Lancement du bot
-def main():
-    if not TELEGRAM_BOT_TOKEN:
-        raise ValueError("Token Telegram manquant ou vide.")
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    print("🤖 Bot lancé. En attente de messages...")
-    application.run_polling()
+# Variable globale pour suivre le statut du bot
+bot_status = {"running": False, "message": "Bot non démarré"}
 
-if __name__ == '__main__':
-    main()
+def run_telegram_bot():
+    """Fonction pour exécuter le bot Telegram"""
+    global bot_status
+    try:
+        if not TELEGRAM_BOT_TOKEN:
+            bot_status["message"] = "❌ Token Telegram manquant"
+            return
+        
+        application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+        application.add_handler(CommandHandler("start", start))
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        
+        bot_status["running"] = True
+        bot_status["message"] = "✅ Bot Telegram actif et en fonctionnement"
+        print("🤖 Bot lancé sur Hugging Face Spaces")
+        
+        application.run_polling()
+    except Exception as e:
+        bot_status["message"] = f"❌ Erreur bot: {str(e)}"
+        print(f"Erreur bot: {e}")
+
+def get_bot_status():
+    """Fonction pour l'interface Gradio"""
+    return bot_status["message"]
+
+# Démarrage automatique du bot en arrière-plan
+def start_bot_background():
+    bot_thread = threading.Thread(target=run_telegram_bot, daemon=True)
+    bot_thread.start()
+
+# Interface Gradio
+demo = gr.Interface(
+    fn=get_bot_status,
+    inputs=None,
+    outputs=gr.Textbox(label="Statut du Bot", lines=2),
+    title="🤖 FactCheck Bot - Telegram",
+    description="Bot Telegram de vérification d'informations adapté à l'âge. Le bot fonctionne en arrière-plan.",
+    article="Utilisez votre bot sur Telegram avec la commande /start",
+    allow_flagging="never"
+)
+
+if __name__ == "__main__":
+    # Démarrer le bot Telegram en arrière-plan
+    start_bot_background()
+    
+    # Lancer l'interface Gradio
+    demo.launch()
