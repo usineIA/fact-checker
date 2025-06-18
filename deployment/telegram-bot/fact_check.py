@@ -1,12 +1,18 @@
-# Bot version enrichie avec gestion prénom/âge - Hugging Face Spaces (Gradio)
 import os
 import requests
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
-import threading
-import gradio as gr
+from dotenv import load_dotenv
+import logging
 
-# Récupération des tokens depuis les variables d'environnement Hugging Face
+# Configuration minimale du logging pour Hugging Face
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Chargement des variables d'environnement (identique)
+load_dotenv()
 API_TOKEN_TOGETHER = os.getenv("API_TOKEN_TOGETHER")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
@@ -16,14 +22,13 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
-# Stockage temporaire des utilisateurs
+# Stockage utilisateur (identique)
 user_data = {}
 
 def contains_sensitive_content(text):
     mots_interdits = ["sexe", "viol", "suicide", "pornographie", "drogue", "meurtre", "terrorisme"]
     return any(mot.lower() in text.lower() for mot in mots_interdits)
 
-# Fonction de réponse IA
 def chat_with_ai(user_input, user_name, niveau="enfant"):
     if niveau == "enfant":
         system_prompt = (
@@ -68,13 +73,11 @@ def chat_with_ai(user_input, user_name, niveau="enfant"):
     except Exception as e:
         return f"Une erreur s'est produite : {e}"
 
-# Commande /start → démarrage personnalisé
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_data[chat_id] = {"step": "awaiting_name"}
     await update.message.reply_text("Bonjour 👋 ! Comment t'appelles-tu ?")
 
-# Message handler complet (avec état utilisateur)
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     message = update.message.text.strip()
@@ -114,53 +117,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response = chat_with_ai(message, name, niveau)
         await update.message.reply_text(response)
 
-# Variable globale pour suivre le statut du bot
-bot_status = {"running": False, "message": "Bot non démarré"}
+def run_bot():
+    """Nouvelle fonction pour Hugging Face"""
+    if not TELEGRAM_BOT_TOKEN:
+        logging.error("Token Telegram manquant")
+        return
 
-def run_telegram_bot():
-    """Fonction pour exécuter le bot Telegram"""
-    global bot_status
-    try:
-        if not TELEGRAM_BOT_TOKEN:
-            bot_status["message"] = "❌ Token Telegram manquant"
-            return
-        
-        application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-        application.add_handler(CommandHandler("start", start))
-        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-        
-        bot_status["running"] = True
-        bot_status["message"] = "✅ Bot Telegram actif et en fonctionnement"
-        print("🤖 Bot lancé sur Hugging Face Spaces")
-        
-        application.run_polling()
-    except Exception as e:
-        bot_status["message"] = f"❌ Erreur bot: {str(e)}"
-        print(f"Erreur bot: {e}")
-
-def get_bot_status():
-    """Fonction pour l'interface Gradio"""
-    return bot_status["message"]
-
-# Démarrage automatique du bot en arrière-plan
-def start_bot_background():
-    bot_thread = threading.Thread(target=run_telegram_bot, daemon=True)
-    bot_thread.start()
-
-# Interface Gradio
-demo = gr.Interface(
-    fn=get_bot_status,
-    inputs=None,
-    outputs=gr.Textbox(label="Statut du Bot", lines=2),
-    title="🤖 FactCheck Bot - Telegram",
-    description="Bot Telegram de vérification d'informations adapté à l'âge. Le bot fonctionne en arrière-plan.",
-    article="Utilisez votre bot sur Telegram avec la commande /start",
-    allow_flagging="never"
-)
-
-if __name__ == "__main__":
-    # Démarrer le bot Telegram en arrière-plan
-    start_bot_background()
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
-    # Lancer l'interface Gradio
-    demo.launch()
+    logging.info("🤖 Bot lancé. En attente de messages...")
+    application.run_polling()
+
+if __name__ == '__main__':
+    run_bot()
