@@ -1,0 +1,89 @@
+# Node/React/Next.js
+node_modules/
+/.next/
+/out/
+/build/
+.next/
+.next/**
+*.tsbuildinfo
+.next-env.d.ts
+
+# Yarn/PNPM/NPM
+.yarn/
+.pnp*
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vercel
+.vercel/
+
+# Coverage
+coverage/
+
+# Misc
+.DS_Store
+*.pem
+
+# Env files
+.env*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+*.mo
+*.pot
+*.log
+local_settings.py
+instance/
+.webassets-cache
+.scrapy
+docs/_build/
+.target/
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+.python-version
+.mypy_cache/
+.dmypy.json
+.pyre/
+venv/
+ENV/
+env/
+.venv/
+
+# VS Code
+.vscode/
+
+# OS
+Thumbs.db
