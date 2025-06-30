@@ -1,0 +1,3 @@
+// Utility to copy asset images to public directory for use in Next.js
+// This script is not meant to be run, but to indicate that assets should be moved to /public for direct use in the UI.
+// Assets: logo.jpeg, bot_avatar.jpeg, user_avatar.jpeg
