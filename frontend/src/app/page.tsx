@@ -12,7 +12,7 @@ export default function Home() {
     {
       role: "assistant",
       content:
-        "👋 Bonjour ! Je suis Facty. Pour commencer, dis-moi ton prénom 🙂",
+        "👋 Bonjour ! Je suis DinoBot. Pour commencer, dis-moi ton prénom 🙂",
     },
   ]);
   const [input, setInput] = useState("");
@@ -94,22 +94,20 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-pink-100 via-yellow-100 to-blue-100 flex flex-col items-center py-6 px-2">
-      <div className="w-full max-w-md bg-white/80 rounded-3xl shadow-xl p-6 flex flex-col items-center">
+    <main className="min-h-screen bg-gradient-to-br from-[#B6F3EF] to-[#E6D6FB] flex flex-col items-center py-4 px-2">
+      <div className="w-full max-w-6xl bg-[#FEFEFD]/90 rounded-3xl shadow-xl p-4 flex flex-col items-center border-4 border-[#7840D8]">
         <Image
-          src="/assets/logo.jpeg"
-          alt="Facty Logo"
-          width={120}
-          height={120}
-          className="rounded-2xl mb-2 border-4 border-pink-300 shadow-lg"
+          src="/assets/dinobot_logo.png"
+          alt="DinoBot Logo"
+          width={250}
+          height={250}
+          className="rounded-2xl mb-2 border-4 border-[#3BCEC4] shadow-lg"
         />
-        <h1 className="text-3xl font-extrabold text-pink-600 mb-1 text-center drop-shadow-lg">
-          Facty
-        </h1>
-        <p className="text-lg text-yellow-700 font-semibold mb-4 text-center">
-          🤖 Le fact-checker rigolo pour enfants !<br />Vérifie si une info est vraie ou fausse, en toute simplicité.
+        
+        <p className="text-lg text-[#7840D8] font-semibold mb-4 text-center">
+          🤖 Le fact-checker rigolo pour les petits (et les plus grands !) <br />Vérifie si une info est vraie ou fausse, en toute simplicité.
         </p>
-        <div className="w-full flex flex-col gap-2 bg-blue-50 rounded-xl p-3 h-96 overflow-y-auto mb-3 border-2 border-blue-200">
+        <div className="w-full flex flex-col gap-2 bg-[#9F7AF8]/10 rounded-xl p-4 h-[480px] overflow-y-auto mb-3 border-2 border-[#3BCEC4]">
           {messages.map((msg, idx) => (
             <div
               key={idx}
@@ -117,29 +115,29 @@ export default function Home() {
             >
               {msg.role === "assistant" && (
                 <Image
-                  src="/assets/bot_avatar.jpeg"
+                  src="/assets/dinobot_logo-2.png"
                   alt="Bot"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-pink-300"
+                  width={60}
+                  height={60}
+                  className="rounded-2xl border-2 border-[#FED808]"
                 />
               )}
               <div
-                className={`px-4 py-2 rounded-2xl max-w-[70%] text-base font-medium shadow-md ${
+                className={`px-4 py-2 rounded-2xl max-w-[70%] text-base font-large shadow-md ${
                   msg.role === "user"
-                    ? "bg-pink-200 text-pink-900 self-end"
-                    : "bg-yellow-100 text-blue-900"
+                    ? "bg-[#3BCEC4] text-[#242672] self-end"
+                    : "bg-[#FEFEFD] text-[#7840D8]"
                 }`}
               >
                 {msg.content}
               </div>
               {msg.role === "user" && (
                 <Image
-                  src="/assets/user_avatar.jpeg"
+                  src="/assets/user_avatar.png"
                   alt="User"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-yellow-400"
+                  width={60}
+                  height={60}
+                  className="rounded-2xl border-2 border-[#FED808]"
                 />
               )}
             </div>
@@ -149,12 +147,12 @@ export default function Home() {
         <div className="w-full flex gap-2 mt-2">
           <input
             type="text"
-            className="flex-1 rounded-xl border-2 border-pink-300 px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white text-pink-900 placeholder:text-pink-400"
+            className="flex-1 rounded-xl border-2 border-[#7840D8] px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[#3BCEC4] bg-white text-[#242672] placeholder:text-[#9F7AF8]"
             placeholder={
               step === "awaiting_name"
-                ? "Ton prénom..."
+                ? "Tape ton prénom ici..."
                 : step === "awaiting_age"
-                ? "Ton âge..."
+                ? "Tape ton âge ici..."
                 : "Pose ta question ici..."
             }
             value={input}
@@ -166,15 +164,15 @@ export default function Home() {
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="bg-pink-400 hover:bg-pink-500 text-white font-bold px-5 py-2 rounded-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-[#7840D8] hover:bg-[#9F7AF8] text-white font-bold px-5 py-2 rounded-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Envoyer"
           >
             {loading ? "..." : "Envoyer"}
           </button>
         </div>
       </div>
-      <footer className="mt-6 text-sm text-blue-500 opacity-80">
-        © {year ?? ""} Facty. Pour les enfants curieux !
+      <footer className="mt-6 text-sm text-[#242672] opacity-80">
+        © {year ?? ""} DinoBot. Pour les enfants curieux !
       </footer>
     </main>
   );
