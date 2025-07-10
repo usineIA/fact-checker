@@ -37,7 +37,7 @@ export default function Home() {
     if (!input.trim()) return;
     setMessages((prev) => [...prev, { role: "user", content: input }]);
     setLoading(true);
-    let payload: any = {};
+    let payload: { message: string; name: string; age: number } = { message: "", name: "", age: 0 };
     let nextStep = step;
     if (step === "awaiting_name") {
       payload = { message: input, name: input.trim(), age: 0 };
