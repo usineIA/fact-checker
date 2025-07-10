@@ -103,7 +103,7 @@ export default function Home() {
           height={250}
           className="rounded-2xl mb-2 border-4 border-[#3BCEC4] shadow-lg"
         />
-        
+      
         <p className="text-lg text-[#7840D8] font-semibold mb-4 text-center">
           🤖 Le fact-checker rigolo pour les petits (et les plus grands !) <br />Vérifie si une info est vraie ou fausse, en toute simplicité.
         </p>
