@@ -258,3 +258,7 @@ async def chat_endpoint(req: ChatRequest):
     response = factcheck_bot.chat_with_ai(req.message, req.name, niveau, age)
     factcheck_bot.log_user_interaction(req.name, req.message, response, niveau)
     return {"response": response}
+
+@app.get("/")
+def read_root():
+    return {"message": "DinoBot backend is running!"}
